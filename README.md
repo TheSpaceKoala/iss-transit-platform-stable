@@ -16,7 +16,7 @@ The private source repository also contains a maintainer workflow that publishes
 - Supports read-only Telegram commands for status and configuration.
 - Supports controlled Telegram updates to selected `config.json` fields.
 - Restricts Telegram command execution to `TELEGRAM_CHAT_ID`.
-- Supports Italian, English, and German via `config.json`.
+- Supports Italian, English, German, French, and Romansh via `config.json`.
 - Runs with GitHub Actions schedules or manual workflow dispatch.
 
 ## Repository Structure
@@ -63,7 +63,7 @@ The private source repository also contains `.github/workflows/publish-stable.ym
 - `core/telegram_commands.py`: command registry, routing, authorization, and command handlers.
 - `core/config_editor.py`: safe updates to editable config fields.
 - `core/i18n.py`: translation loading, language fallback, and shared localized labels.
-- `locales/*.json`: Italian, English, and German translations.
+- `locales/*.json`: Italian, English, German, French, and Romansh translations.
 - `state/telegram_state.json`: last processed Telegram update ID.
 - `.github/workflows/daily.yml`: daily/manual transit search.
 - `.github/workflows/process-telegram-commands.yml`: scheduled/manual Telegram command processing.
@@ -185,6 +185,8 @@ Supported `language` values:
 - `it`
 - `en`
 - `de`
+- `fr`
+- `rm`
 
 If `language` is missing or invalid, the bot falls back to Italian.
 
@@ -274,7 +276,7 @@ The bot supports these commands:
 /setradius <km>
 /setsatellites <list>
 /setsearchhours <hours>
-/setlanguage <it|en|de>
+/setlanguage <it|en|de|fr|rm>
 ```
 
 What they do:
@@ -288,7 +290,7 @@ What they do:
 - `/setradius <km>`: updates the search radius.
 - `/setsatellites <list>`: updates enabled satellites, for example `iss,tiangong,hubble`.
 - `/setsearchhours <hours>`: updates the search window.
-- `/setlanguage <it|en|de>`: updates the bot language.
+- `/setlanguage <it|en|de|fr|rm>`: updates the bot language.
 
 Config-changing commands update `config.json`. The command-processing workflow commits and pushes the change back to the repository when the file changed.
 

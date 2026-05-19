@@ -8,7 +8,7 @@ SUPPORTED_SATELLITES = {
     "tiangong": "Tiangong",
     "hubble": "Hubble",
 }
-SUPPORTED_LANGUAGES = {"it", "en", "de"}
+SUPPORTED_LANGUAGES = {"it", "en", "de", "fr", "rm"}
 MAX_RADIUS_KM = 500
 MAX_SEARCH_HOURS = 168
 

@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 DEFAULT_LANGUAGE = "it"
-SUPPORTED_LANGUAGES = {"it", "en", "de"}
+SUPPORTED_LANGUAGES = {"it", "en", "de", "fr", "rm"}
 LOCALES_DIR = Path(__file__).resolve().parent.parent / "locales"
 
 _LOCALE_CACHE = {}
