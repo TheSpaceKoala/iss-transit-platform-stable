@@ -1,0 +1,17 @@
+{
+  "users": [
+    {
+      "lat": 46.000000,
+      "lon": 9.000000,
+
+      "radius_km": 40,
+      "search_hours": 72,
+
+      "coarse_grid_step_km": 10,
+      "fine_grid_radius_km": 10,
+      "fine_grid_step_km": 2,
+
+      "enabled_satellites": ["ISS", "Tiangong", "Hubble"]
+    }
+  ]
+}
