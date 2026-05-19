@@ -77,13 +77,16 @@ The private source repository also contains `.github/workflows/publish-stable.ym
 4. Send one message to the new bot from the Telegram chat you want to authorize.
 5. Find your chat ID with Telegram `getUpdates`.
 6. Edit `config.json` with your location and preferences.
-7. Add the required GitHub Secrets.
-8. Enable GitHub Actions in the fork if GitHub asks you to do so.
-9. Set workflow permissions to allow read and write access.
-10. Run `Setup Telegram Commands` manually once.
-11. Send `/help` to the bot on Telegram.
-12. Run `Process Telegram Commands` manually once, or wait for the schedule.
-13. After the bot responds, test `/config` and `/run`.
+7. In your fork, open `Settings -> Secrets and variables -> Actions -> Repository secrets` and add:
+   - `TELEGRAM_BOT_TOKEN`: the token from BotFather.
+   - `TELEGRAM_CHAT_ID`: the chat ID returned by `getUpdates`.
+8. Optional: add `USER_LAT` and `USER_LON` as repository secrets if you want coordinates to override `config.json`.
+9. Enable GitHub Actions in the fork if GitHub asks you to do so.
+10. Set workflow permissions to allow read and write access.
+11. Run `Setup Telegram Commands` manually once.
+12. Send `/help` to the bot on Telegram.
+13. Run `Process Telegram Commands` manually once, or wait for the schedule.
+14. After the bot responds, test `/config` and `/run`.
 
 The detailed setup steps are below.
 
@@ -103,7 +106,13 @@ Create a new bot:
 
 Save the generated token. It will be used as the `TELEGRAM_BOT_TOKEN` GitHub Secret.
 
-Then send any message to your new bot from the chat you want to use.
+Then open your new bot in Telegram and send it any message, for example:
+
+```text
+hello
+```
+
+This step is important: Telegram will not return your chat ID until the bot has received at least one message.
 
 To find your chat ID, open this URL in a browser, replacing `YOUR_TOKEN` with the bot token:
 
@@ -111,15 +120,37 @@ To find your chat ID, open this URL in a browser, replacing `YOUR_TOKEN` with th
 https://api.telegram.org/botYOUR_TOKEN/getUpdates
 ```
 
+Example:
+
+```text
+https://api.telegram.org/bot123456:ABC-DEF/getUpdates
+```
+
 Look for:
 
 ```json
-"chat": {
-  "id": 123456789
+{
+  "ok": true,
+  "result": [
+    {
+      "message": {
+        "chat": {
+          "id": 123456789
+        }
+      }
+    }
+  ]
 }
 ```
 
-Use that number as `TELEGRAM_CHAT_ID`.
+Use the `id` value as `TELEGRAM_CHAT_ID`.
+
+Notes:
+
+- For a private one-to-one chat, the ID is usually a positive number.
+- For a group chat, the ID is often a negative number.
+- If `result` is empty, send another message to the bot and refresh the `getUpdates` URL.
+- Keep the bot token private. Do not commit it to `config.json` or any file in the repository.
 
 ## Configuration
 
@@ -181,7 +212,9 @@ In your fork, go to:
 Settings -> Secrets and variables -> Actions
 ```
 
-Add these required repository secrets:
+Open the `Secrets` tab, then choose `New repository secret`.
+
+Add these required repository secrets exactly with these names:
 
 | Secret | Required | Description |
 |---|---:|---|
@@ -194,6 +227,8 @@ Optional coordinate overrides:
 |---|---:|---|
 | `USER_LAT` | No | Latitude override |
 | `USER_LON` | No | Longitude override |
+
+Do not put Telegram secrets in `config.json`. `config.json` is tracked by Git and may become public if your fork is public.
 
 `TELEGRAM_CHAT_ID` is also the authorization source for Telegram commands. Commands from other chats are rejected and cannot run searches or modify `config.json`.
 
