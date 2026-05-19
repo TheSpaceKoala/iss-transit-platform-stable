@@ -2,8 +2,10 @@ import math
 
 import matplotlib.pyplot as plt
 
+from core.i18n import body_label, localized_event_type, t
 
-def create_transit_image(event, filename):
+
+def create_transit_image(event, filename, settings=None):
     closest = min(max(event["closest_pos"], 0), 1)
 
     y = closest
@@ -22,7 +24,10 @@ def create_transit_image(event, filename):
     ax.text(
         0,
         -1.25,
-        f"{event['emoji']} {event['name']} - {event['type']}",
+        (
+            f"{event['emoji']} {body_label(settings, event['name'])} - "
+            f"{localized_event_type(settings, event['type'])}"
+        ),
         ha="center",
         fontsize=14,
         weight="bold",
@@ -31,7 +36,12 @@ def create_transit_image(event, filename):
     ax.text(
         0,
         -1.40,
-        f"Durata {event['duration_seconds']:.1f}s | massimo {event['closest_pos']:.2f} r",
+        t(
+            settings,
+            "graphics.duration_line",
+            duration=f"{event['duration_seconds']:.1f}",
+            closest=f"{event['closest_pos']:.2f}",
+        ),
         ha="center",
         fontsize=11,
     )

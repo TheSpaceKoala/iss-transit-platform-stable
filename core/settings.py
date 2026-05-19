@@ -79,6 +79,7 @@ def get_settings():
     return {
         "lat": get_coordinate(user, "USER_LAT", "lat"),
         "lon": get_coordinate(user, "USER_LON", "lon"),
+        "language": user.get("language"),
 
         "radius_km": get_required_number(user, "radius_km", int),
         "search_hours": get_required_number(user, "search_hours", int),

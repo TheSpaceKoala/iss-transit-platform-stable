@@ -1,0 +1,110 @@
+name: Process Telegram Commands
+
+run-name: Process Telegram Commands (${{ github.event_name }})
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "*/5 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: process-telegram-commands
+  cancel-in-progress: false
+
+jobs:
+  process-telegram-commands:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Print workflow diagnostics
+        run: |
+          echo "event_name=${{ github.event_name }}"
+          echo "event_schedule=${{ github.event.schedule }}"
+          echo "ref=${{ github.ref }}"
+          echo "ref_name=${{ github.ref_name }}"
+          echo "default_branch=${{ github.event.repository.default_branch }}"
+          echo "sha=${{ github.sha }}"
+          echo "utc_now=$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          echo "workflow=${{ github.workflow }}"
+          echo "actor=${{ github.actor }}"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - run: python process_telegram_commands.py
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          USER_LAT: ${{ secrets.USER_LAT }}
+          USER_LON: ${{ secrets.USER_LON }}
+
+      - name: Commit config changes
+        run: |
+          notify_failure() {
+            curl -sS -X POST \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -d "chat_id=${TELEGRAM_CHAT_ID}" \
+              --data-urlencode "text=Errore: non sono riuscito a salvare config.json su GitHub."
+          }
+
+          if git diff --quiet -- config.json; then
+            echo "Config unchanged."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          commit_message="Update config from Telegram command"
+          if git diff -- config.json | grep -q '"language"'; then
+            commit_message="Update language from Telegram command"
+          fi
+          git add config.json
+          git commit -m "$commit_message" || {
+            notify_failure
+            exit 1
+          }
+          git push || {
+            notify_failure
+            exit 1
+          }
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Commit Telegram state
+        run: |
+          notify_failure() {
+            curl -sS -X POST \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -d "chat_id=${TELEGRAM_CHAT_ID}" \
+              --data-urlencode "text=Errore: non sono riuscito a salvare lo stato Telegram su GitHub."
+          }
+
+          if git diff --quiet -- state/telegram_state.json; then
+            echo "Telegram state unchanged."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add state/telegram_state.json
+          git commit -m "Update Telegram state" || {
+            notify_failure
+            exit 1
+          }
+          git push || {
+            notify_failure
+            exit 1
+          }
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
