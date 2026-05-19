@@ -4,7 +4,9 @@ on:
   workflow_dispatch:
 
   schedule:
-    - cron: "0 5 * * *"
+    # GitHub schedules use UTC. Run at both possible UTC offsets and
+    # continue only when it is 09:00 in Europe/Zurich.
+    - cron: "0 7,8 * * *"
 
 jobs:
   send-message:
@@ -14,15 +16,33 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
+      - name: Check local schedule time
+        id: schedule-time
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$(TZ=Europe/Zurich date +%H)" = "09" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.schedule-time.outputs.should_run == 'true'
 
       - uses: actions/setup-python@v5
+        if: steps.schedule-time.outputs.should_run == 'true'
         with:
           python-version: "3.11"
 
       - run: pip install -r requirements.txt
+        if: steps.schedule-time.outputs.should_run == 'true'
 
       - run: python send_telegram.py
+        if: steps.schedule-time.outputs.should_run == 'true'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
