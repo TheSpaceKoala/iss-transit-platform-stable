@@ -54,6 +54,19 @@ def build_event_map_url(event):
     return f"https://www.google.com/maps?q={event['lat']:.6f},{event['lon']:.6f}"
 
 
+def event_sort_key(event):
+    return (
+        event["time"],
+        event.get("sep", float("inf")),
+        event.get("satellite_name", ""),
+        event.get("name", ""),
+    )
+
+
+def prioritize_events(events):
+    return sorted(events, key=event_sort_key)
+
+
 def build_header_text(settings):
     return (
         t(settings, "report.title")
@@ -220,8 +233,8 @@ def build_position_text(settings):
 
 
 def build_message(settings, transits, close_approaches, stats, diagnostics):
-    grouped_transits = group_best(transits, 60)
-    grouped_close = group_best(close_approaches, 180)
+    grouped_transits = prioritize_events(group_best(transits, 60))
+    grouped_close = prioritize_events(group_best(close_approaches, 180))
 
     text = build_header_text(settings)
 
