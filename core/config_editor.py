@@ -118,11 +118,11 @@ def update_satellites(satellites_value):
     if not requested:
         raise ConfigValidationError("validation.satellite_required")
 
-    unknown = [
-        item
-        for item in requested
-        if item not in SUPPORTED_SATELLITES
-    ]
+    unknown = []
+
+    for item in requested:
+        if item not in SUPPORTED_SATELLITES and item not in unknown:
+            unknown.append(item)
 
     if unknown:
         allowed = ", ".join(SUPPORTED_SATELLITES)

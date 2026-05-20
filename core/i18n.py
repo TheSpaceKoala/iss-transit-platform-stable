@@ -12,6 +12,9 @@ _LOCALE_CACHE = {}
 def get_language(settings):
     language = settings.get("language") if isinstance(settings, dict) else None
 
+    if isinstance(language, str):
+        language = language.strip().lower()
+
     if language in SUPPORTED_LANGUAGES:
         return language
 

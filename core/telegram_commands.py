@@ -142,15 +142,18 @@ def load_telegram_state():
     if not STATE_PATH.exists():
         return {"last_update_id": None}
 
-    with STATE_PATH.open("r", encoding="utf-8") as state_file:
-        state = json.load(state_file)
+    try:
+        with STATE_PATH.open("r", encoding="utf-8") as state_file:
+            state = json.load(state_file)
+    except (OSError, json.JSONDecodeError):
+        return {"last_update_id": None}
 
     if not isinstance(state, dict):
         return {"last_update_id": None}
 
     last_update_id = state.get("last_update_id")
 
-    if not isinstance(last_update_id, int):
+    if not isinstance(last_update_id, int) or isinstance(last_update_id, bool):
         last_update_id = None
 
     return {"last_update_id": last_update_id}
@@ -303,7 +306,7 @@ def handle_setlocation(args, settings, _chat_id):
 
 
 def handle_setradius(args, settings, _chat_id):
-    if not args:
+    if len(args.split()) != 1:
         return t(settings, "setradius.usage_error")
 
     radius_km = update_radius(args)
@@ -321,7 +324,7 @@ def handle_setsatellites(args, settings, _chat_id):
 
 
 def handle_setsearchhours(args, settings, _chat_id):
-    if not args:
+    if len(args.split()) != 1:
         return t(settings, "setsearchhours.usage_error")
 
     search_hours = update_search_hours(args)
@@ -330,7 +333,7 @@ def handle_setsearchhours(args, settings, _chat_id):
 
 
 def handle_setlanguage(args, settings, _chat_id):
-    if not args:
+    if len(args.split()) != 1:
         return t(settings, "setlanguage.usage_error")
 
     language = update_language(args)

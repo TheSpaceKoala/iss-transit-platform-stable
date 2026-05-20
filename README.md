@@ -40,7 +40,9 @@ iss-transit-platform/
 ├─ locales/
 │  ├─ it.json
 │  ├─ en.json
-│  └─ de.json
+│  ├─ de.json
+│  ├─ fr.json
+│  └─ rm.json
 ├─ state/
 │  └─ telegram_state.json
 └─ .github/
@@ -473,7 +475,7 @@ python send_telegram.py
 Triggers:
 
 - manual `workflow_dispatch`
-- daily schedule at `05:00 UTC`
+- daily schedule at `03:17 UTC`
 
 ### Process Telegram Commands
 
