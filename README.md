@@ -71,22 +71,156 @@ The private source repository also contains `.github/workflows/publish-stable.ym
 
 ## Quick Start
 
-1. Fork the public stable repository.
-2. Decide whether the fork should be private. If `config.json` contains real coordinates and the fork is public, those coordinates are public.
-3. Create a Telegram bot with BotFather.
-4. Send one message to the new bot from the Telegram chat you want to authorize.
-5. Find your chat ID with Telegram `getUpdates`.
-6. Edit `config.json` with your location and preferences.
-7. In your fork, open `Settings -> Secrets and variables -> Actions -> Repository secrets` and add:
-   - `TELEGRAM_BOT_TOKEN`: the token from BotFather.
-   - `TELEGRAM_CHAT_ID`: the chat ID returned by `getUpdates`.
-8. Optional: add `USER_LAT` and `USER_LON` as repository secrets if you want coordinates to override `config.json`.
-9. Enable GitHub Actions in the fork if GitHub asks you to do so.
-10. Set workflow permissions to allow read and write access.
-11. Run `Setup Telegram Commands` manually once.
-12. Send `/help` to the bot on Telegram.
-13. Run `Process Telegram Commands` manually once, or wait for the schedule.
-14. After the bot responds, test `/config` and `/run`.
+These steps are enough to get a fork running for the first time.
+
+1. Fork the public stable repository:
+
+   ```text
+   https://github.com/ericcatta/iss-transit-platform-stable
+   ```
+
+2. Decide whether your fork should be private.
+
+   If you put real coordinates in `config.json` and the fork is public, those coordinates are public too. For personal use, a private fork is recommended.
+
+3. In Telegram, create a bot with BotFather:
+
+   ```text
+   @BotFather
+   /newbot
+   ```
+
+   BotFather will give you a token. Keep it private. This token will become the `TELEGRAM_BOT_TOKEN` GitHub Secret.
+
+4. Open your new bot in Telegram and send it one message, for example:
+
+   ```text
+   hello
+   ```
+
+   Telegram only exposes your chat ID after the bot has received at least one message.
+
+5. Find your Telegram chat ID.
+
+   Open this URL in a browser, replacing `YOUR_TOKEN` with the token from BotFather:
+
+   ```text
+   https://api.telegram.org/botYOUR_TOKEN/getUpdates
+   ```
+
+   Look for this value in the JSON response:
+
+   ```json
+   "chat": {
+     "id": 123456789
+   }
+   ```
+
+   Use that number as `TELEGRAM_CHAT_ID`. In group chats the ID can be negative. If `result` is empty, send another message to the bot and refresh the URL.
+
+6. Edit `config.json` in your fork.
+
+   At minimum, change the placeholder coordinates:
+
+   ```json
+   "lat": 46.0,
+   "lon": 9.0
+   ```
+
+   Set them to your search center. You can also adjust:
+
+   - `radius_km`: search radius in km;
+   - `search_hours`: how far ahead to search;
+   - `language`: `it`, `en`, `de`, `fr`, or `rm`;
+   - `enabled_satellites`: `ISS`, `Tiangong`, `Hubble`.
+
+7. Add the required GitHub Secrets in your fork.
+
+   Go to:
+
+   ```text
+   Settings -> Secrets and variables -> Actions -> Repository secrets
+   ```
+
+   Add these secrets exactly with these names:
+
+   | Secret | Value |
+   |---|---|
+   | `TELEGRAM_BOT_TOKEN` | The token from BotFather |
+   | `TELEGRAM_CHAT_ID` | The chat ID from `getUpdates` |
+
+   Optional: add `USER_LAT` and `USER_LON` as secrets if you want them to override the coordinates in `config.json`.
+
+   Do not put Telegram tokens in `config.json`.
+
+8. Enable GitHub Actions if GitHub asks you to do so.
+
+   Forked repositories sometimes show a banner asking you to enable workflows. Accept it.
+
+9. Allow workflows to write back to the repository.
+
+   Go to:
+
+   ```text
+   Settings -> Actions -> General -> Workflow permissions
+   ```
+
+   Select:
+
+   ```text
+   Read and write permissions
+   ```
+
+   Save the setting. This is needed because Telegram commands can update `config.json` and `state/telegram_state.json`.
+
+10. Register the Telegram command menu.
+
+    In GitHub, open:
+
+    ```text
+    Actions -> Setup Telegram Commands -> Run workflow
+    ```
+
+    Run it once on the `main` branch.
+
+11. Test command processing.
+
+    Send this message to your bot in Telegram:
+
+    ```text
+    /help
+    ```
+
+    Then in GitHub run:
+
+    ```text
+    Actions -> Process Telegram Commands -> Run workflow
+    ```
+
+    The bot should reply with the command list.
+
+12. Test the configuration and a manual search.
+
+    Send:
+
+    ```text
+    /config
+    ```
+
+    Run `Process Telegram Commands` again, or wait for the scheduled workflow.
+
+    Then send:
+
+    ```text
+    /run
+    ```
+
+    `/run` starts a real transit search and can take longer than simple commands.
+
+13. Leave the scheduled workflows enabled.
+
+    - `Daily ISS Transit Platform` sends the regular daily report.
+    - `Process Telegram Commands` checks Telegram periodically and replies to commands.
 
 The detailed setup steps are below.
 
