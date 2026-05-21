@@ -480,7 +480,7 @@ python send_telegram.py
 Triggers:
 
 - manual `workflow_dispatch`
-- daily schedule at `03:17 UTC`
+- daily schedule at `01:37 UTC`
 
 The run logs include a compact final summary with run type, status, active satellites, targets, coarse hits, refined hits, final events, close approaches, PNG count, and approximate duration.
 
