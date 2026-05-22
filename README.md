@@ -45,6 +45,7 @@ iss-transit-platform/
 │  ├─ de.json
 │  ├─ fr.json
 │  └─ rm.json
+├─ tests/
 ├─ state/
 │  └─ telegram_state.json
 └─ .github/
@@ -69,6 +70,7 @@ The private source repository also contains `.github/workflows/publish-stable.ym
 - `core/config_editor.py`: safe updates to editable config fields.
 - `core/i18n.py`: translation loading, language fallback, and shared localized labels.
 - `locales/*.json`: Italian, English, German, French, and Romansh translations.
+- `tests/`: small regression suite for messages, i18n, Telegram command parsing, authorization, and config editing.
 - `state/telegram_state.json`: last processed Telegram update ID.
 - `.github/workflows/daily.yml`: daily/manual transit search.
 - `.github/workflows/process-telegram-commands.yml`: scheduled/manual Telegram command processing.
@@ -529,6 +531,7 @@ It publishes the files needed by third-party users, including:
 
 - source code;
 - translations;
+- tests;
 - config placeholder;
 - Telegram scripts;
 - user-facing workflows;
@@ -587,6 +590,12 @@ Register the Telegram command menu:
 python setup_telegram_commands.py
 ```
 
+Run the test suite:
+
+```bash
+python -m unittest discover -s tests
+```
+
 These scripts can send real Telegram messages.
 
 If your system does not provide a `python` command, use `python3` for the local commands above.
@@ -600,12 +609,12 @@ If your system does not provide a `python` command, use `python3` for the local 
 - Report events are ordered predictably: transits first, then close approaches; within each section, events are ordered by time and then by separation.
 - The command processor is not a persistent process, webhook, or server. It runs once per workflow execution.
 - The project supports one configured user entry at the moment: `users[0]`.
-- The private source repository contains a small test suite for message/report builders, but tests may be omitted from the public stable mirror.
+- The public stable repository includes the test suite, so fork users can verify local changes before running the bot.
 
 ## Short Roadmap
 
 - Improve README examples as the public stable repository is finalized.
-- Add more tests around config editing and command routing.
+- Add more tests around full end-to-end command flows.
 - Improve robustness around very rapid Telegram command sequences.
 
 ## License
