@@ -5,8 +5,9 @@ on:
 
   schedule:
     # GitHub schedules use UTC. Run at both possible UTC offsets and
-    # continue only when it is 09:00 in Europe/Zurich.
-    - cron: "0 7,8 * * *"
+    # continue only for the slot that maps to 09:00 in Europe/Zurich.
+    - cron: "0 7 * * *"
+    - cron: "0 8 * * *"
 
 jobs:
   send-message:
@@ -24,7 +25,27 @@ jobs:
             exit 0
           fi
 
-          if [ "$(TZ=Europe/Zurich date +%H)" = "09" ]; then
+          triggered_cron="${{ github.event.schedule }}"
+          scheduled_hour="$(printf '%s' "$triggered_cron" | cut -d' ' -f2)"
+          local_hour="$(
+            SCHEDULED_HOUR="$scheduled_hour" python3 - <<'PY'
+          from datetime import datetime, timezone
+          from zoneinfo import ZoneInfo
+          import os
+
+          hour = int(os.environ["SCHEDULED_HOUR"])
+          scheduled = datetime.now(timezone.utc).replace(
+              hour=hour,
+              minute=0,
+              second=0,
+              microsecond=0,
+          )
+
+          print(scheduled.astimezone(ZoneInfo("Europe/Zurich")).strftime("%H"))
+          PY
+          )"
+
+          if [ "$local_hour" = "09" ]; then
             echo "should_run=true" >> "$GITHUB_OUTPUT"
           else
             echo "should_run=false" >> "$GITHUB_OUTPUT"
