@@ -49,7 +49,10 @@ def get_required_number(user, key, cast):
 
 
 def get_coordinate(user, env_name, config_key):
-    raw_value = os.environ.get(env_name, user.get(config_key))
+    raw_value = os.environ.get(env_name)
+
+    if raw_value in (None, ""):
+        raw_value = user.get(config_key)
 
     if raw_value in (None, ""):
         raise RuntimeError(
@@ -79,6 +82,7 @@ def get_settings():
     return {
         "lat": get_coordinate(user, "USER_LAT", "lat"),
         "lon": get_coordinate(user, "USER_LON", "lon"),
+        "language": user.get("language"),
 
         "radius_km": get_required_number(user, "radius_km", int),
         "search_hours": get_required_number(user, "search_hours", int),

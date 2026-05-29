@@ -1,17 +1,11 @@
-name: Daily ISS Transit Platform
+name: Setup Telegram Commands
 
 on:
   workflow_dispatch:
 
-  schedule:
-    - cron: "37 1 * * *"
-
 jobs:
-  send-message:
+  setup-telegram-commands:
     runs-on: ubuntu-latest
-
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4
@@ -22,9 +16,7 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - run: python send_telegram.py
+      - run: python setup_telegram_commands.py
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          USER_LAT: ${{ secrets.USER_LAT }}
-          USER_LON: ${{ secrets.USER_LON }}
